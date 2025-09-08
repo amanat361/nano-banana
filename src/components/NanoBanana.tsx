@@ -122,10 +122,10 @@ export function NanoBanana() {
   return (
     <div className="max-w-md mx-auto sm:p-4 space-y-6">
       <Card className="sm:rounded-lg rounded-none border-0 sm:border">
-        <CardContent className="p-1 sm:p-2">
+        <CardContent className="p-2 sm:p-3">
           <div
             onClick={handleImageClick}
-            className="w-full h-64 border-2 border-dashed border-gray-300 sm:rounded-lg rounded-none flex items-center justify-center cursor-pointer hover:border-gray-400 transition-colors"
+            className="w-full h-64 border-2 border-dashed border-gray-300 sm:rounded-sm rounded-none flex items-center justify-center cursor-pointer hover:border-gray-400 transition-colors"
           >
             {selectedImage ? (
               <img
@@ -304,7 +304,7 @@ export function NanoBanana() {
 
       {result && (
         <Card className="sm:rounded-lg rounded-none border-0 sm:border">
-          <CardContent className="p-1 sm:p-2">
+          <CardContent className="p-2 sm:p-3">
             <h3 className="text-lg font-semibold mb-2 px-3 sm:px-1">Result:</h3>
             <img
               src={result}
