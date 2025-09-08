@@ -68,7 +68,9 @@ fi
 
 # Build the Docker image
 echo "🔨 Building Docker image..."
-if ! docker build -t $IMAGE_NAME . > /dev/null 2>&1; then
+if docker build --network=host -t $IMAGE_NAME . > /dev/null 2>&1; then
+    echo -e "${GREEN}✅ Docker image built successfully${NC}"
+else
     echo -e "${RED}❌ Error: Failed to build Docker image${NC}"
     exit 1
 fi
@@ -77,13 +79,13 @@ fi
 echo "🚀 Starting container..."
 if docker run -d \
     --name $CONTAINER_NAME \
+    --network=host \
     --env-file "$ENV_FILE" \
-    -p $HOST_PORT:$CONTAINER_PORT \
     $IMAGE_NAME > /dev/null; then
     
     echo -e "${GREEN}✅ Success! Nano Banana is running${NC}"
     echo ""
-    echo "🌐 Access your app at: http://localhost:$HOST_PORT"
+    echo "🌐 Access your app at: http://localhost:3000"
     echo "📋 Container name: $CONTAINER_NAME"
     echo ""
     echo "Useful commands:"
