@@ -66,7 +66,7 @@ fi
 
 # Build the Docker image
 echo "🔨 Building Docker image..."
-if docker build --network=host -t $IMAGE_NAME . > /dev/null 2>&1; then
+if docker build -t $IMAGE_NAME . > /dev/null 2>&1; then
     echo -e "${GREEN}✅ Docker image built successfully${NC}"
 else
     echo -e "${RED}❌ Error: Failed to build Docker image${NC}"
