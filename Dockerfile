@@ -7,6 +7,7 @@ COPY . .
 
 RUN bun install
 
-EXPOSE 3000
+ENV PORT=7429
+EXPOSE 7429
 
 CMD ["bun", "src/index.tsx"]

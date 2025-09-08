@@ -85,7 +85,7 @@ if docker run -d \
     
     echo -e "${GREEN}✅ Success! Nano Banana is running${NC}"
     echo ""
-    echo "🌐 Access your app at: http://localhost:3000"
+    echo "🌐 Access your app at: http://localhost:7429"
     echo "📋 Container name: $CONTAINER_NAME"
     echo ""
     echo "Useful commands:"
