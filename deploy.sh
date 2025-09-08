@@ -9,8 +9,6 @@ NC='\033[0m' # No Color
 # Configuration
 IMAGE_NAME="nano-banana"
 CONTAINER_NAME="nano-banana-app"
-HOST_PORT=7429
-CONTAINER_PORT=3000
 
 echo "🍌 Nano Banana Deployment Script"
 echo "================================="
