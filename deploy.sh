@@ -77,7 +77,6 @@ fi
 echo "🚀 Starting container..."
 if docker run -d \
     --name $CONTAINER_NAME \
-    --network=host \
     --env-file "$ENV_FILE" \
     $IMAGE_NAME > /dev/null; then
     
