@@ -25,19 +25,26 @@ else
 fi
 echo ""
 
-# Check if .env file exists
-if [ ! -f ".env" ]; then
-    echo -e "${RED}❌ Error: .env file not found!${NC}"
-    echo "Please create a .env file with your GEMINI_API_KEY"
+# Check if .env or .env.local file exists
+ENV_FILE=""
+if [ -f ".env" ]; then
+    ENV_FILE=".env"
+elif [ -f ".env.local" ]; then
+    ENV_FILE=".env.local"
+else
+    echo -e "${RED}❌ Error: No environment file found!${NC}"
+    echo "Please create either .env or .env.local file with your GEMINI_API_KEY"
     echo "You can copy from .env.example:"
     echo "  cp .env.example .env"
     exit 1
 fi
 
-# Check if GEMINI_API_KEY exists in .env
-if ! grep -q "GEMINI_API_KEY" .env; then
-    echo -e "${YELLOW}⚠️  Warning: GEMINI_API_KEY not found in .env file${NC}"
-    echo "Make sure to add your Gemini API key to the .env file"
+echo "📋 Using environment file: $ENV_FILE"
+
+# Check if GEMINI_API_KEY exists in the env file
+if ! grep -q "GEMINI_API_KEY" "$ENV_FILE"; then
+    echo -e "${YELLOW}⚠️  Warning: GEMINI_API_KEY not found in $ENV_FILE${NC}"
+    echo "Make sure to add your Gemini API key to the environment file"
 fi
 
 # Check if Docker is running
@@ -70,7 +77,7 @@ fi
 echo "🚀 Starting container..."
 if docker run -d \
     --name $CONTAINER_NAME \
-    --env-file .env \
+    --env-file "$ENV_FILE" \
     -p $HOST_PORT:$CONTAINER_PORT \
     $IMAGE_NAME > /dev/null; then
     
