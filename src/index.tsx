@@ -1,6 +1,7 @@
 import { serve } from "bun";
 import index from "./index.html";
 import { processNanoBanana, type NanoBananaRequest } from "./backend/gemini";
+import { globalQueue } from "./backend/queue";
 
 const server = serve({
   routes: {
@@ -41,14 +42,32 @@ const server = serve({
             }, { status: 400 });
           }
 
-          const result = await processNanoBanana(body);
-          return Response.json(result);
+          const { queueId, position } = await globalQueue.addToQueue();
+          
+          // Simple wait for turn implementation
+          await globalQueue.waitForTurn(queueId);
+          
+          try {
+            const result = await processNanoBanana(body);
+            return Response.json({ ...result, queueId });
+          } finally {
+            globalQueue.completeRequest(queueId);
+          }
         } catch (error) {
           return Response.json({
             success: false,
             error: error instanceof Error ? error.message : "Unknown error"
           }, { status: 500 });
         }
+      }
+    },
+
+    "/api/queue-status": {
+      async GET(req) {
+        const url = new URL(req.url);
+        const queueId = url.searchParams.get('queueId');
+        const status = globalQueue.getQueueStatus(queueId || undefined);
+        return Response.json(status);
       }
     },
   },

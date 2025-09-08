@@ -12,6 +12,8 @@ export function NanoBanana() {
   const [styleOption, setStyleOption] = useState<string | null>(null);
   const [locationOption, setLocationOption] = useState<string | null>(null);
   const [finalPrompt, setFinalPrompt] = useState("");
+  const [queueStatus, setQueueStatus] = useState<string>("");
+  const [queueId, setQueueId] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -64,6 +66,23 @@ export function NanoBanana() {
     }
   }, [selectedPrompt, ageOption, styleOption, locationOption, showAdvanced]);
 
+  const pollQueueStatus = async (queueId: string) => {
+    const response = await fetch(`/api/queue-status?queueId=${queueId}`);
+    const status = await response.json();
+    
+    if (status.isCurrentlyProcessing) {
+      setQueueStatus("Processing your request...");
+    } else if (status.position === 1) {
+      setQueueStatus("You're next in queue!");
+    } else if (status.position > 1) {
+      setQueueStatus(`Position ${status.position} in queue`);
+    } else if (status.queueLength > 0 && !status.isProcessing) {
+      setQueueStatus("Waiting to start...");
+    } else {
+      setQueueStatus("");
+    }
+  };
+
   const handleSubmit = async () => {
     if (!selectedImage || !finalPrompt) return;
 
@@ -95,6 +114,8 @@ export function NanoBanana() {
       alert(`Error: ${error instanceof Error ? error.message : 'Unknown error'}`);
     } finally {
       setIsLoading(false);
+      setQueueId(null);
+      setQueueStatus("");
     }
   };
 
@@ -131,7 +152,7 @@ export function NanoBanana() {
 
       {selectedImage && (
         <div className="space-y-4 px-4 sm:px-0">
-          <div className="flex gap-2">
+          <div className="flex gap-2 flex-wrap">
             <Button
               variant={selectedPrompt === "add a boyfriend" ? "default" : "outline"}
               onClick={() => handlePromptSelect("add a boyfriend")}
@@ -272,7 +293,7 @@ export function NanoBanana() {
             {isLoading ? (
               <>
                 <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                Processing...
+                {queueStatus || "Processing..."}
               </>
             ) : (
               "Submit"

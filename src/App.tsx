@@ -4,7 +4,7 @@ import "../styles/globals.css";
 
 export function App() {
   return (
-    <div>
+    <div className="max-sm:py-6">
       <NanoBanana />
     </div>
   );
