@@ -144,10 +144,10 @@ export function ImageEditor({ mode, onBack }: ImageEditorProps) {
       if (data.success && data.imageData) {
         setResult(`data:${data.mimeType};base64,${data.imageData}`);
       } else {
-        alert(`Error: ${data.error || 'Unknown error'}`);
+        alert(`Unable to generate image: ${data.error || 'Unknown error'}. This may be due to your prompt containing content that goes against the model's safety guidelines, or the request could not be processed. Please try modifying your prompt and try again.`);
       }
     } catch (error) {
-      alert(`Error: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      alert(`Unable to generate image: ${error instanceof Error ? error.message : 'Unknown error'}. This may be due to your prompt containing content that goes against the model's safety guidelines, or there was a connection issue. Please try modifying your prompt and try again.`);
     } finally {
       setIsLoading(false);
       setQueueId(null);
