@@ -66,7 +66,19 @@ export function ImageEditor({ mode, onBack }: ImageEditorProps) {
 
   useEffect(() => {
     if (selectedPrimaryOption) {
-      let prompt = selectedPrimaryOption === 'custom' ? '' : selectedPrimaryOption;
+      let prompt = '';
+      
+      if (selectedPrimaryOption === 'custom') {
+        prompt = '';
+      } else {
+        // Build prompt with basePrompt + selectedPrimaryOption
+        if (mode.basePrompt) {
+          prompt = `${mode.basePrompt} ${selectedPrimaryOption}`;
+        } else {
+          prompt = selectedPrimaryOption;
+        }
+      }
+      
       const modifiers: string[] = [];
       
       if (showAdvanced) {
@@ -88,7 +100,7 @@ export function ImageEditor({ mode, onBack }: ImageEditorProps) {
       
       setFinalPrompt(prompt);
     }
-  }, [selectedPrimaryOption, advancedOptions, customPrompts, showAdvanced]);
+  }, [selectedPrimaryOption, advancedOptions, customPrompts, showAdvanced, mode.basePrompt]);
 
   const pollQueueStatus = async (queueId: string) => {
     const response = await fetch(`/api/queue-status?queueId=${queueId}`);

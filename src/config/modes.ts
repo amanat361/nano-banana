@@ -141,7 +141,7 @@ export const EDITING_MODES: Record<string, EditingMode> = {
     title: 'Product Photo',
     description: 'Turn your photo into a professional product image',
     emoji: '📸',
-    basePrompt: '',
+    basePrompt: 'turn this image into a professional product photo,',
     primaryOptions: [
       {
         id: 'white-bg',
