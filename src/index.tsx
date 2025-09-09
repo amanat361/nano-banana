@@ -2,6 +2,7 @@ import { serve } from "bun";
 import index from "./index.html";
 import { processNanoBanana, type NanoBananaRequest } from "./backend/gemini";
 import { globalQueue } from "./backend/queue";
+import { file } from "bun";
 
 const server = serve({
   routes: {
