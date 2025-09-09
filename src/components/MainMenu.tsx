@@ -15,7 +15,7 @@ export function MainMenu({ onSelectMode }: MainMenuProps) {
         <p className="text-gray-600">Choose what you'd like to do with your image</p>
       </div>
 
-      <div className="space-y-4 sm:px-0">
+      <div className="space-y-6 sm:px-0">
         {modes.map((mode) => (
           <MenuItem
             key={mode.id}

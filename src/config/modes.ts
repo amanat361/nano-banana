@@ -145,15 +145,21 @@ export const EDITING_MODES: Record<string, EditingMode> = {
     primaryOptions: [
       {
         id: 'white-bg',
-        label: 'White Background',
+        label: 'White BG',
         emoji: '⚪',
-        promptModifier: 'remove the background and replace it with a clean white background'
+        promptModifier: 'also remove the background and replace it with a clean white background'
       },
       {
         id: 'black-bg',
-        label: 'Black Background', 
+        label: 'Black BG', 
         emoji: '⚫',
-        promptModifier: 'remove the background and replace it with a clean black background'
+        promptModifier: 'also remove the background and replace it with a clean black background'
+      },
+      {
+        id: 'auto-bg',
+        label: 'Auto BG',
+        emoji: '🌳',
+        promptModifier: 'also remove the background and replace it with a clean background as if it was a professional photo shoot'
       }
     ],
     advancedCategories: [
@@ -162,16 +168,16 @@ export const EDITING_MODES: Record<string, EditingMode> = {
         label: 'Enhancement',
         options: [
           {
-            id: 'lighting',
-            label: 'Lighting',
+            id: 'ad',
+            label: 'Advert',
             emoji: '💡',
-            promptModifier: 'improve the lighting to be more professional'
+            promptModifier: 'make it look like an advert for the product, do not include any text'
           },
           {
-            id: 'shadows',
-            label: 'Shadows',
+            id: 'text',
+            label: 'Add Text',
             emoji: '🌫️',
-            promptModifier: 'add realistic drop shadows'
+            promptModifier: 'add stylish text to the image'
           },
           {
             id: 'clarity',

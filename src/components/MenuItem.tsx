@@ -45,7 +45,7 @@ export function MenuItem({ mode, onSelect }: MenuItemProps) {
 
   return (
     <Card 
-      className="sm:rounded-lg rounded-none border cursor-pointer hover:shadow-md transition-shadow "
+      className="mx-2 rounded-lg border cursor-pointer hover:shadow-md transition-shadow "
       onClick={() => onSelect(mode)}
     >
       <CardContent className="p-2">
@@ -57,7 +57,7 @@ export function MenuItem({ mode, onSelect }: MenuItemProps) {
                 <img 
                   src={before} 
                   alt="Before preview"
-                  className="w-full h-32 sm:h-40 object-cover rounded-lg border border-gray-200"
+                  className="w-full h-40 object-cover rounded-sm border border-gray-200"
                 />
                 <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 bg-gray-600 text-white text-xs px-2 py-0.5 rounded">
                   Before
@@ -74,7 +74,7 @@ export function MenuItem({ mode, onSelect }: MenuItemProps) {
                 <img 
                   src={after} 
                   alt="After preview"
-                  className="w-full h-32 sm:h-40 object-cover rounded-lg border border-gray-200"
+                  className="w-full h-40 object-cover rounded-sm border border-gray-200"
                 />
                 <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 bg-green-600 text-white text-xs px-2 py-0.5 rounded">
                   After
