@@ -1,3 +1,13 @@
+// Import images
+import companionBefore from '../images/companion-before.jpeg';
+import companionAfter from '../images/companion-after.jpeg';
+import productBefore from '../images/product-before.jpg';
+import productAfter from '../images/product-after.png';
+import styleBefore from '../images/style-before.jpg';
+import styleAfter from '../images/style-after.png';
+import customBefore from '../images/custom-before.png';
+import customAfter from '../images/custom-after.png';
+
 export interface ModeOption {
   id: string;
   label: string;
@@ -9,6 +19,7 @@ export interface ModeOptionCategory {
   id: string;
   label: string;
   options: ModeOption[];
+  isCustom?: boolean;
 }
 
 export interface EditingMode {
@@ -19,6 +30,10 @@ export interface EditingMode {
   basePrompt: string;
   primaryOptions: ModeOption[];
   advancedCategories?: ModeOptionCategory[];
+  previewImages?: {
+    before: string;
+    after: string;
+  };
 }
 
 export const EDITING_MODES: Record<string, EditingMode> = {
@@ -115,7 +130,11 @@ export const EDITING_MODES: Record<string, EditingMode> = {
           }
         ]
       }
-    ]
+    ],
+    previewImages: {
+      before: companionBefore,
+      after: companionAfter
+    }
   },
   product: {
     id: 'product',
@@ -162,7 +181,104 @@ export const EDITING_MODES: Record<string, EditingMode> = {
           }
         ]
       }
-    ]
+    ],
+    previewImages: {
+      before: productBefore,
+      after: productAfter
+    }
+  },
+  style: {
+    id: 'style',
+    title: 'Change Style',
+    description: 'Transform your photo into different artistic styles',
+    emoji: '🎨',
+    basePrompt: 'change the style of this image to',
+    primaryOptions: [
+      {
+        id: 'ghibli',
+        label: 'Ghibli',
+        emoji: '🌸',
+        promptModifier: 'Studio Ghibli animation style'
+      },
+      {
+        id: 'pixar',
+        label: 'Pixar',
+        emoji: '🎬',
+        promptModifier: 'Pixar 3D animation style'
+      },
+      {
+        id: 'sketch',
+        label: 'Sketch',
+        emoji: '✏️',
+        promptModifier: 'pencil sketch drawing'
+      }
+    ],
+    advancedCategories: [
+      {
+        id: 'animation',
+        label: 'Animation',
+        options: [
+          {
+            id: 'disney',
+            label: 'Disney',
+            emoji: '🏰',
+            promptModifier: 'classic Disney animation style'
+          },
+          {
+            id: 'anime',
+            label: 'Anime',
+            emoji: '👘',
+            promptModifier: 'Japanese anime style'
+          },
+          {
+            id: 'cartoon',
+            label: 'Cartoon',
+            emoji: '🎪',
+            promptModifier: 'cartoon illustration style'
+          }
+        ]
+      },
+      {
+        id: 'art',
+        label: 'Art Style',
+        options: [
+          {
+            id: 'watercolor',
+            label: 'Watercolor',
+            emoji: '🎨',
+            promptModifier: 'watercolor painting style'
+          },
+          {
+            id: 'oil',
+            label: 'Oil Paint',
+            emoji: '🖼️',
+            promptModifier: 'oil painting style'
+          },
+          {
+            id: 'pencil',
+            label: 'Pencil',
+            emoji: '✏️',
+            promptModifier: 'detailed pencil drawing style'
+          }
+        ]
+      }
+    ],
+    previewImages: {
+      before: styleBefore,
+      after: styleAfter
+    }
+  },
+  custom: {
+    id: 'custom',
+    title: 'Custom Edit',
+    description: 'Tell the AI exactly what you want to do with your photo',
+    emoji: '✏️',
+    basePrompt: '',
+    primaryOptions: [],
+    previewImages: {
+      before: customBefore,
+      after: customAfter
+    }
   }
 };
 

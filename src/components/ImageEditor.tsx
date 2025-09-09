@@ -10,11 +10,14 @@ interface ImageEditorProps {
 
 export function ImageEditor({ mode, onBack }: ImageEditorProps) {
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
-  const [selectedPrimaryOption, setSelectedPrimaryOption] = useState<string | null>(null);
+  const [selectedPrimaryOption, setSelectedPrimaryOption] = useState<string | null>(
+    mode.id === 'custom' ? 'custom' : null
+  );
   const [isLoading, setIsLoading] = useState(false);
   const [result, setResult] = useState<string | null>(null);
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [advancedOptions, setAdvancedOptions] = useState<Record<string, string>>({});
+  const [customPrompts, setCustomPrompts] = useState<Record<string, string>>({});
   const [finalPrompt, setFinalPrompt] = useState("");
   const [queueStatus, setQueueStatus] = useState<string>("");
   const [queueId, setQueueId] = useState<string | null>(null);
@@ -38,7 +41,7 @@ export function ImageEditor({ mode, onBack }: ImageEditorProps) {
   const handlePrimaryOptionSelect = (optionId: string) => {
     const option = mode.primaryOptions.find(opt => opt.id === optionId);
     if (option) {
-      setSelectedPrimaryOption(option.promptModifier);
+      setSelectedPrimaryOption(option.promptModifier || 'custom');
     }
   };
 
@@ -54,24 +57,38 @@ export function ImageEditor({ mode, onBack }: ImageEditorProps) {
     }
   };
 
+  const handleCustomPromptChange = (categoryId: string, value: string) => {
+    setCustomPrompts(prev => ({
+      ...prev,
+      [categoryId]: value
+    }));
+  };
+
   useEffect(() => {
     if (selectedPrimaryOption) {
-      let prompt = selectedPrimaryOption;
+      let prompt = selectedPrimaryOption === 'custom' ? '' : selectedPrimaryOption;
       const modifiers: string[] = [];
       
       if (showAdvanced) {
         Object.values(advancedOptions).forEach(modifier => {
           if (modifier) modifiers.push(modifier);
         });
+        Object.values(customPrompts).forEach(customPrompt => {
+          if (customPrompt.trim()) modifiers.push(customPrompt.trim());
+        });
       }
       
-      if (modifiers.length > 0) {
+      if (selectedPrimaryOption === 'custom' && modifiers.length > 0) {
+        prompt = modifiers.join(', ');
+      } else if (modifiers.length > 0 && prompt) {
         prompt = `${prompt}, ${modifiers.join(', ')}`;
+      } else if (modifiers.length > 0) {
+        prompt = modifiers.join(', ');
       }
       
       setFinalPrompt(prompt);
     }
-  }, [selectedPrimaryOption, advancedOptions, showAdvanced]);
+  }, [selectedPrimaryOption, advancedOptions, customPrompts, showAdvanced]);
 
   const pollQueueStatus = async (queueId: string) => {
     const response = await fetch(`/api/queue-status?queueId=${queueId}`);
@@ -145,13 +162,13 @@ export function ImageEditor({ mode, onBack }: ImageEditorProps) {
         <CardContent className="p-2 sm:p-3">
           <div
             onClick={handleImageClick}
-            className="w-full h-64 border-2 border-dashed border-gray-300 sm:rounded-sm rounded-none flex items-center justify-center cursor-pointer hover:border-gray-400 transition-colors"
+            className="w-full min-h-64 border-2 overflow-hidden border-dashed border-gray-300 sm:rounded-sm rounded-none flex items-center justify-center cursor-pointer hover:border-gray-400 transition-colors"
           >
             {selectedImage ? (
               <img
                 src={selectedImage}
                 alt="Selected"
-                className="w-full h-full object-cover sm:rounded-lg rounded-none"
+                className="w-full"
               />
             ) : (
               <div className="text-center text-gray-500">
@@ -172,19 +189,21 @@ export function ImageEditor({ mode, onBack }: ImageEditorProps) {
 
       {selectedImage && (
         <div className="space-y-4 px-4 sm:px-0">
-          <div className="flex gap-2 flex-wrap">
-            {mode.primaryOptions.map((option) => (
-              <Button
-                key={option.id}
-                variant={selectedPrimaryOption === option.promptModifier ? "default" : "outline"}
-                onClick={() => handlePrimaryOptionSelect(option.id)}
-                className="flex-1"
-                disabled={isLoading}
-              >
-                {option.emoji} {option.label}
-              </Button>
-            ))}
-          </div>
+          {mode.primaryOptions.length > 0 && (
+            <div className="flex gap-2 flex-wrap">
+              {mode.primaryOptions.map((option) => (
+                <Button
+                  key={option.id}
+                  variant={selectedPrimaryOption === option.promptModifier ? "default" : "outline"}
+                  onClick={() => handlePrimaryOptionSelect(option.id)}
+                  className="flex-1"
+                  disabled={isLoading}
+                >
+                  {option.emoji} {option.label}
+                </Button>
+              ))}
+            </div>
+          )}
 
           {mode.advancedCategories && mode.advancedCategories.length > 0 && (
             <Button
@@ -204,19 +223,30 @@ export function ImageEditor({ mode, onBack }: ImageEditorProps) {
                   <label className="text-sm font-medium text-gray-700 mb-2 block">
                     {category.label}:
                   </label>
-                  <div className="grid grid-cols-3 gap-2">
-                    {category.options.map((option) => (
-                      <Button
-                        key={option.id}
-                        variant={advancedOptions[category.id] === option.promptModifier ? "default" : "outline"}
-                        onClick={() => handleAdvancedOptionSelect(category.id, option.id)}
-                        className="text-sm"
-                        disabled={isLoading}
-                      >
-                        {option.emoji} {option.label}
-                      </Button>
-                    ))}
-                  </div>
+                  {category.isCustom ? (
+                    <input
+                      type="text"
+                      placeholder="Type your custom prompt here..."
+                      value={customPrompts[category.id] || ''}
+                      onChange={(e) => handleCustomPromptChange(category.id, e.target.value)}
+                      disabled={isLoading}
+                      className="w-full p-3 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    />
+                  ) : (
+                    <div className="grid grid-cols-3 gap-2">
+                      {category.options.map((option) => (
+                        <Button
+                          key={option.id}
+                          variant={advancedOptions[category.id] === option.promptModifier ? "default" : "outline"}
+                          onClick={() => handleAdvancedOptionSelect(category.id, option.id)}
+                          className="text-sm"
+                          disabled={isLoading}
+                        >
+                          {option.emoji} {option.label}
+                        </Button>
+                      ))}
+                    </div>
+                  )}
                 </div>
               ))}
 
@@ -230,6 +260,19 @@ export function ImageEditor({ mode, onBack }: ImageEditorProps) {
                   placeholder="Prompt will appear here..."
                 />
               </div>
+            </div>
+          )}
+
+          {mode.id === 'custom' && (
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-gray-700">What do you want to do with your photo?</label>
+              <textarea
+                value={finalPrompt}
+                onChange={(e) => setFinalPrompt(e.target.value)}
+                disabled={isLoading}
+                className="w-full h-20 p-3 border border-gray-300 rounded-lg resize-none text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                placeholder="Type your custom prompt here..."
+              />
             </div>
           )}
 
@@ -257,7 +300,7 @@ export function ImageEditor({ mode, onBack }: ImageEditorProps) {
             <img
               src={result}
               alt="Generated result"
-              className="w-full sm:rounded-lg rounded-none"
+              className="border-dashed border-gray-300 border-2 w-full sm:rounded-sm rounded-none"
             />
           </CardContent>
         </Card>
