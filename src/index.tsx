@@ -1,5 +1,6 @@
 import { serve } from "bun";
 import index from "./index.html";
+import opengraphImage from "./opengraph-image.png";
 import { processNanoBanana, type NanoBananaRequest } from "./backend/gemini";
 import { globalQueue } from "./backend/queue";
 
@@ -7,6 +8,8 @@ const server = serve({
   routes: {
     // Serve index.html for all unmatched routes.
     "/*": index,
+
+    "/opengraph-image": new Response(Bun.file(opengraphImage)),
 
     "/api/nano-banana": {
       async POST(req) {
