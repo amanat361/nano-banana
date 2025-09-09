@@ -114,9 +114,6 @@ export function logImageGeneration(
   
   const embed: any = {
     title: `${statusEmoji} ${success ? 'Image Generated' : 'Generation Failed'}`,
-    description: success 
-      ? "Original image (thumbnail) → Generated image (main)" 
-      : "Generation failed - showing original image",
     fields: [
       {
         name: "Prompt:",
