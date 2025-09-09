@@ -9,7 +9,7 @@ export function MainMenu({ onSelectMode }: MainMenuProps) {
   const modes = getAllModes();
 
   return (
-    <div className="max-w-md mx-auto sm:p-4 space-y-6">
+    <div className="max-w-xl mx-auto sm:p-4 space-y-6">
       <div className="text-center px-0">
         <h1 className="text-3xl font-bold mb-3 text-gray-800">Free Image Editor</h1>
         <p className="text-gray-600">Choose what you'd like to do with your image</p>
