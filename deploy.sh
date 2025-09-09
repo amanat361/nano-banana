@@ -32,6 +32,7 @@ elif [ -f ".env.local" ]; then
 else
     echo -e "${RED}❌ Error: No environment file found!${NC}"
     echo "Please create .env file with your GEMINI_API_KEY"
+    echo "Optionally add DISCORD_WEBHOOK_URL for Discord logging"
     exit 1
 fi
 
@@ -42,6 +43,12 @@ if grep -q "GEMINI_API_KEY" "$ENV_FILE"; then
     echo -e "${GREEN}✅ GEMINI_API_KEY found in $ENV_FILE${NC}"
 else
     echo -e "${YELLOW}⚠️  Warning: GEMINI_API_KEY not found in $ENV_FILE${NC}"
+fi
+
+if grep -q "DISCORD_WEBHOOK_URL" "$ENV_FILE"; then
+    echo -e "${GREEN}✅ DISCORD_WEBHOOK_URL found in $ENV_FILE (Discord logging enabled)${NC}"
+else
+    echo -e "${BLUE}ℹ️  DISCORD_WEBHOOK_URL not found in $ENV_FILE (Discord logging disabled)${NC}"
 fi
 
 # Check if Docker is running
@@ -93,7 +100,7 @@ if docker run -d \
     docker logs $CONTAINER_NAME --tail 20
     
     echo -e "\n${BLUE}🌐 Environment Variables Check:${NC}"
-    docker exec $CONTAINER_NAME printenv | grep -E "(PORT|GEMINI_API_KEY)" || echo "No relevant env vars found"
+    docker exec $CONTAINER_NAME printenv | grep -E "(PORT|GEMINI_API_KEY|DISCORD_WEBHOOK_URL)" || echo "No relevant env vars found"
     
     echo -e "\n${BLUE}🔌 Port Check:${NC}"
     if docker exec $CONTAINER_NAME sh -c "command -v netstat" > /dev/null 2>&1; then

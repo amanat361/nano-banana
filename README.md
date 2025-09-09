@@ -54,6 +54,11 @@ The app includes a global queue system to manage API usage
    ```
    GEMINI_API_KEY=your_gemini_api_key_here
    ```
+   
+   Optionally, add a Discord webhook URL for logging (uploads and generations will be sent to Discord):
+   ```
+   DISCORD_WEBHOOK_URL=https://discord.com/api/webhooks/your_webhook_url_here
+   ```
 
 4. **Start the development server**:
    ```bash
