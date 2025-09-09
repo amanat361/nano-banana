@@ -40,7 +40,7 @@ export const EDITING_MODES: Record<string, EditingMode> = {
   companion: {
     id: 'companion',
     title: 'Add Companion',
-    description: 'Add a boyfriend or girlfriend to your photo',
+    description: 'Give yourself the partner you deserve',
     emoji: '💑',
     basePrompt: '',
     primaryOptions: [
@@ -139,7 +139,7 @@ export const EDITING_MODES: Record<string, EditingMode> = {
   product: {
     id: 'product',
     title: 'Product Photo',
-    description: 'Transform your photo into a professional product image',
+    description: 'Turn your photo into a professional product image',
     emoji: '📸',
     basePrompt: '',
     primaryOptions: [
@@ -271,7 +271,7 @@ export const EDITING_MODES: Record<string, EditingMode> = {
   custom: {
     id: 'custom',
     title: 'Custom Edit',
-    description: 'Tell the AI exactly what you want to do with your photo',
+    description: 'Tell the AI exactly what you want with your photo',
     emoji: '✏️',
     basePrompt: '',
     primaryOptions: [],
