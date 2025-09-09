@@ -1,12 +1,12 @@
 // Import images
-import companionBefore from '../images/companion-before.jpeg';
-import companionAfter from '../images/companion-after.jpeg';
+import companionBefore from '../images/companion-before.jpg';
+import companionAfter from '../images/companion-after.jpg';
 import productBefore from '../images/product-before.jpg';
-import productAfter from '../images/product-after.png';
+import productAfter from '../images/product-after.jpg';
 import styleBefore from '../images/style-before.jpg';
-import styleAfter from '../images/style-after.png';
-import customBefore from '../images/custom-before.png';
-import customAfter from '../images/custom-after.png';
+import styleAfter from '../images/style-after.jpg';
+import customBefore from '../images/custom-before.jpg';
+import customAfter from '../images/custom-after.jpg';
 
 export interface ModeOption {
   id: string;
