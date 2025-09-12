@@ -22,6 +22,13 @@ export interface ModeOptionCategory {
   isCustom?: boolean;
 }
 
+export interface CategoryGroup {
+  id: string;
+  label: string;
+  icon: string;
+  categories: ModeOptionCategory[];
+}
+
 export interface EditingMode {
   id: string;
   title: string;
@@ -30,6 +37,7 @@ export interface EditingMode {
   basePrompt: string;
   primaryOptions: ModeOption[];
   advancedCategories?: ModeOptionCategory[];
+  categoryGroups?: CategoryGroup[];
   previewImages?: {
     before: string;
     after: string;
@@ -57,76 +65,265 @@ export const EDITING_MODES: Record<string, EditingMode> = {
         promptModifier: 'add a girlfriend'
       }
     ],
-    advancedCategories: [
+    categoryGroups: [
       {
-        id: 'age',
-        label: 'Age',
-        options: [
+        id: 'basics',
+        label: 'Basics',
+        icon: '⚡',
+        categories: [
           {
-            id: 'young',
-            label: 'Young',
-            emoji: '🧒',
-            promptModifier: 'young'
+            id: 'style',
+            label: 'Style',
+            options: [
+              {
+                id: 'casual',
+                label: 'Casual',
+                emoji: '👕',
+                promptModifier: 'casual'
+              },
+              {
+                id: 'formal',
+                label: 'Formal',
+                emoji: '👔',
+                promptModifier: 'formal'
+              },
+              {
+                id: 'athletic',
+                label: 'Athletic',
+                emoji: '🏃',
+                promptModifier: 'athletic'
+              },
+              {
+                id: 'goth',
+                label: 'Goth',
+                emoji: '🖤',
+                promptModifier: 'goth aesthetic'
+              },
+              {
+                id: 'egirl',
+                label: 'E-girl',
+                emoji: '🎮',
+                promptModifier: 'e-girl aesthetic'
+              },
+              {
+                id: 'trad',
+                label: 'Trad',
+                emoji: '🌸',
+                promptModifier: 'traditional conservative style'
+              }
+            ]
           },
           {
-            id: 'adult',
-            label: 'Adult',
-            emoji: '🧑',
-            promptModifier: 'middle-aged'
-          },
-          {
-            id: 'old',
-            label: 'Old',
-            emoji: '👴',
-            promptModifier: 'old'
+            id: 'bodytype',
+            label: 'Body Type',
+            options: [
+              {
+                id: 'skinny',
+                label: 'Skinny',
+                emoji: '📏',
+                promptModifier: 'skinny body type'
+              },
+              {
+                id: 'fit',
+                label: 'Fit',
+                emoji: '💪',
+                promptModifier: 'fit athletic body type'
+              },
+              {
+                id: 'curvy',
+                label: 'Curvy',
+                emoji: '⏳',
+                promptModifier: 'curvy body type'
+              }
+            ]
           }
         ]
       },
       {
-        id: 'style',
-        label: 'Style',
-        options: [
+        id: 'looks',
+        label: 'Looks',
+        icon: '👤',
+        categories: [
           {
-            id: 'casual',
-            label: 'Casual',
-            emoji: '👕',
-            promptModifier: 'casual'
+            id: 'race',
+            label: 'Ethnicity',
+            options: [
+              {
+                id: 'latino',
+                label: 'Latino/a',
+                emoji: '🇲🇽',
+                promptModifier: 'Latino/Latina'
+              },
+              {
+                id: 'asian',
+                label: 'Asian',
+                emoji: '🇯🇵',
+                promptModifier: 'Asian'
+              },
+              {
+                id: 'white',
+                label: 'White',
+                emoji: '🇺🇸',
+                promptModifier: 'Caucasian'
+              },
+              {
+                id: 'black',
+                label: 'Black',
+                emoji: '🇳🇬',
+                promptModifier: 'Black'
+              },
+              {
+                id: 'persian',
+                label: 'Persian',
+                emoji: '🇮🇷',
+                promptModifier: 'Persian'
+              },
+              {
+                id: 'mixed',
+                label: 'Mixed',
+                emoji: '🌍',
+                promptModifier: 'mixed ethnicity'
+              }
+            ]
           },
           {
-            id: 'formal',
-            label: 'Formal',
-            emoji: '👔',
-            promptModifier: 'formal'
+            id: 'haircolor',
+            label: 'Hair Color',
+            options: [
+              {
+                id: 'blonde',
+                label: 'Blonde',
+                emoji: '💛',
+                promptModifier: 'blonde hair'
+              },
+              {
+                id: 'brunette',
+                label: 'Brunette',
+                emoji: '🤎',
+                promptModifier: 'brown hair'
+              },
+              {
+                id: 'black',
+                label: 'Black',
+                emoji: '🖤',
+                promptModifier: 'black hair'
+              },
+              {
+                id: 'red',
+                label: 'Red',
+                emoji: '❤️',
+                promptModifier: 'red hair'
+              },
+              {
+                id: 'colorful',
+                label: 'Colorful',
+                emoji: '🌈',
+                promptModifier: 'colorful hair'
+              },
+              {
+                id: 'auburn',
+                label: 'Auburn',
+                emoji: '🟫',
+                promptModifier: 'auburn hair'
+              }
+            ]
           },
           {
-            id: 'athletic',
-            label: 'Athletic',
-            emoji: '🏃',
-            promptModifier: 'athletic'
+            id: 'eyecolor',
+            label: 'Eye Color',
+            options: [
+              {
+                id: 'blue',
+                label: 'Blue',
+                emoji: '💙',
+                promptModifier: 'blue eyes'
+              },
+              {
+                id: 'brown',
+                label: 'Brown',
+                emoji: '🤎',
+                promptModifier: 'brown eyes'
+              },
+              {
+                id: 'green',
+                label: 'Green',
+                emoji: '💚',
+                promptModifier: 'green eyes'
+              },
+              {
+                id: 'hazel',
+                label: 'Hazel',
+                emoji: '🟤',
+                promptModifier: 'hazel eyes'
+              },
+              {
+                id: 'gray',
+                label: 'Gray',
+                emoji: '🩶',
+                promptModifier: 'gray eyes'
+              },
+              {
+                id: 'amber',
+                label: 'Amber',
+                emoji: '🟠',
+                promptModifier: 'amber eyes'
+              }
+            ]
           }
         ]
       },
       {
-        id: 'setting',
-        label: 'Setting',
-        options: [
+        id: 'extras',
+        label: 'Extras',
+        icon: '🎯',
+        categories: [
           {
-            id: 'beach',
-            label: 'Beach',
-            emoji: '🏖️',
-            promptModifier: 'at the beach'
+            id: 'age',
+            label: 'Age',
+            options: [
+              {
+                id: 'young',
+                label: '20-30s',
+                emoji: '🧒',
+                promptModifier: 'young'
+              },
+              {
+                id: 'adult',
+                label: '40-50s',
+                emoji: '🧑',
+                promptModifier: 'middle-aged'
+              },
+              {
+                id: 'old',
+                label: '60-70s',
+                emoji: '👴',
+                promptModifier: 'old'
+              }
+            ]
           },
           {
-            id: 'cafe',
-            label: 'Cafe',
-            emoji: '☕',
-            promptModifier: 'in a coffee shop'
-          },
-          {
-            id: 'park',
-            label: 'Park',
-            emoji: '🌳',
-            promptModifier: 'in a park'
+            id: 'setting',
+            label: 'Setting',
+            options: [
+              {
+                id: 'beach',
+                label: 'Beach',
+                emoji: '🏖️',
+                promptModifier: 'at the beach'
+              },
+              {
+                id: 'cafe',
+                label: 'Cafe',
+                emoji: '☕',
+                promptModifier: 'in a coffee shop'
+              },
+              {
+                id: 'park',
+                label: 'Park',
+                emoji: '🌳',
+                promptModifier: 'in a park'
+              }
+            ]
           }
         ]
       }

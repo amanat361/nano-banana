@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import type { EditingMode, ModeOption } from "../config/modes";
+import type { EditingMode, ModeOption, ModeOptionCategory } from "../config/modes";
 
 interface ImageEditorProps {
   mode: EditingMode;
@@ -16,6 +16,7 @@ export function ImageEditor({ mode, onBack }: ImageEditorProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [result, setResult] = useState<string | null>(null);
   const [showAdvanced, setShowAdvanced] = useState(false);
+  const [activeTab, setActiveTab] = useState<string | null>(null);
   const [advancedOptions, setAdvancedOptions] = useState<Record<string, string>>({});
   const [customPrompts, setCustomPrompts] = useState<Record<string, string>>({});
   const [finalPrompt, setFinalPrompt] = useState("");
@@ -46,7 +47,20 @@ export function ImageEditor({ mode, onBack }: ImageEditorProps) {
   };
 
   const handleAdvancedOptionSelect = (categoryId: string, optionId: string) => {
-    const category = mode.advancedCategories?.find(cat => cat.id === categoryId);
+    // Handle both legacy advancedCategories and new categoryGroups
+    let category: ModeOptionCategory | undefined;
+    
+    if (mode.categoryGroups) {
+      // Find category in categoryGroups
+      for (const group of mode.categoryGroups) {
+        category = group.categories.find(cat => cat.id === categoryId);
+        if (category) break;
+      }
+    } else {
+      // Legacy path
+      category = mode.advancedCategories?.find(cat => cat.id === categoryId);
+    }
+    
     const option = category?.options.find(opt => opt.id === optionId);
     
     if (option) {
@@ -217,9 +231,14 @@ export function ImageEditor({ mode, onBack }: ImageEditorProps) {
             </div>
           )}
 
-          {mode.advancedCategories && mode.advancedCategories.length > 0 && (
+          {((mode.advancedCategories && mode.advancedCategories.length > 0) || (mode.categoryGroups && mode.categoryGroups.length > 0)) && (
             <Button
-              onClick={() => setShowAdvanced(!showAdvanced)}
+              onClick={() => {
+                setShowAdvanced(!showAdvanced);
+                if (mode.categoryGroups && mode.categoryGroups.length > 0 && !showAdvanced) {
+                  setActiveTab(mode.categoryGroups[0].id);
+                }
+              }}
               variant="ghost"
               className="w-full"
               disabled={isLoading}
@@ -228,39 +247,107 @@ export function ImageEditor({ mode, onBack }: ImageEditorProps) {
             </Button>
           )}
 
-          {showAdvanced && mode.advancedCategories && (
+          {showAdvanced && (
             <div className="space-y-4">
-              {mode.advancedCategories.map((category) => (
-                <div key={category.id}>
-                  <label className="text-sm font-medium text-gray-700 mb-2 block">
-                    {category.label}:
-                  </label>
-                  {category.isCustom ? (
-                    <input
-                      type="text"
-                      placeholder="Type your custom prompt here..."
-                      value={customPrompts[category.id] || ''}
-                      onChange={(e) => handleCustomPromptChange(category.id, e.target.value)}
-                      disabled={isLoading}
-                      className="w-full p-3 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    />
-                  ) : (
-                    <div className="grid grid-cols-3 gap-2">
-                      {category.options.map((option) => (
-                        <Button
-                          key={option.id}
-                          variant={advancedOptions[category.id] === option.promptModifier ? "default" : "outline"}
-                          onClick={() => handleAdvancedOptionSelect(category.id, option.id)}
-                          className="text-sm"
-                          disabled={isLoading}
-                        >
-                          {option.emoji} {option.label}
-                        </Button>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              ))}
+              {/* Tabbed interface for categoryGroups */}
+              {mode.categoryGroups && mode.categoryGroups.length > 0 ? (
+                <>
+                  {/* Tab navigation */}
+                  <div className="flex border-b border-gray-300 mb-4">
+                    {mode.categoryGroups.map((group) => (
+                      <button
+                        key={group.id}
+                        onClick={() => setActiveTab(group.id)}
+                        className={`flex-1 flex items-center justify-center gap-2 py-2 text-sm font-medium ${
+                          activeTab === group.id
+                            ? 'text-blue-600 border-b-2 border-blue-600'
+                            : 'text-gray-600 hover:text-gray-800'
+                        }`}
+                        disabled={isLoading}
+                      >
+                        <span>{group.icon}</span>
+                        <span>{group.label}</span>
+                      </button>
+                    ))}
+                  </div>
+
+                  {/* Tab content */}
+                  {mode.categoryGroups.map((group) => (
+                    activeTab === group.id && (
+                      <div key={group.id} className="space-y-4">
+                        {group.categories.map((category) => (
+                          <div key={category.id}>
+                            <label className="text-sm font-medium text-gray-700 mb-2 block">
+                              {category.label}:
+                            </label>
+                            {category.isCustom ? (
+                              <input
+                                type="text"
+                                placeholder="Type your custom prompt here..."
+                                value={customPrompts[category.id] || ''}
+                                onChange={(e) => handleCustomPromptChange(category.id, e.target.value)}
+                                disabled={isLoading}
+                                className="w-full p-3 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                              />
+                            ) : (
+                              <div className="grid grid-cols-3 gap-2">
+                                {category.options.map((option) => (
+                                  <Button
+                                    key={option.id}
+                                    variant={advancedOptions[category.id] === option.promptModifier ? "default" : "outline"}
+                                    onClick={() => handleAdvancedOptionSelect(category.id, option.id)}
+                                    className="text-sm"
+                                    disabled={isLoading}
+                                  >
+                                    {option.emoji} {option.label}
+                                  </Button>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    )
+                  ))}
+                </>
+              ) : (
+                /* Legacy interface for advancedCategories */
+                mode.advancedCategories && (
+                  <div className="space-y-4">
+                    {mode.advancedCategories.map((category) => (
+                      <div key={category.id}>
+                        <label className="text-sm font-medium text-gray-700 mb-2 block">
+                          {category.label}:
+                        </label>
+                        {category.isCustom ? (
+                          <input
+                            type="text"
+                            placeholder="Type your custom prompt here..."
+                            value={customPrompts[category.id] || ''}
+                            onChange={(e) => handleCustomPromptChange(category.id, e.target.value)}
+                            disabled={isLoading}
+                            className="w-full p-3 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          />
+                        ) : (
+                          <div className="grid grid-cols-3 gap-2">
+                            {category.options.map((option) => (
+                              <Button
+                                key={option.id}
+                                variant={advancedOptions[category.id] === option.promptModifier ? "default" : "outline"}
+                                onClick={() => handleAdvancedOptionSelect(category.id, option.id)}
+                                className="text-sm"
+                                disabled={isLoading}
+                              >
+                                {option.emoji} {option.label}
+                              </Button>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )
+              )}
 
               <div className="space-y-2">
                 <label className="text-sm font-medium text-gray-700">Prompt Preview:</label>
