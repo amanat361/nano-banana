@@ -341,6 +341,7 @@ export const EDITING_MODES: Record<string, EditingMode> = {
     description: 'Turn your photo into a professional product image',
     emoji: '📸',
     basePrompt: 'turn this image into a professional product photo,',
+    model: 'pro',  // Use Gemini 3 Pro for higher quality product shots
     primaryOptions: [
       {
         id: 'white-bg',
