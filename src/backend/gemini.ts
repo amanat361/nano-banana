@@ -8,6 +8,7 @@ export interface NanoBananaRequest {
   imageData: string | string[];  // Support single or array
   prompt: string;
   mimeType?: string | string[];  // Support single or array
+  model?: 'flash' | 'pro';  // flash = 2.5-flash-image, pro = 3-pro-image-preview
 }
 
 export interface NanoBananaResponse {
@@ -45,7 +46,7 @@ export async function processNanoBanana(request: NanoBananaRequest): Promise<Nan
       ],
     };
 
-    const model = 'gemini-2.5-flash-image';
+    const model = request.model === 'pro' ? 'gemini-3-pro-image-preview' : 'gemini-2.5-flash-image';
 
     // Build image parts - support single or multiple images
     const imageParts: { inlineData: { mimeType: string; data: string } }[] = [];

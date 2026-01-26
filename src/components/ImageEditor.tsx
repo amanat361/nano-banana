@@ -12,7 +12,7 @@ interface ImageEditorProps {
 export function ImageEditor({ mode, onBack, preSelectedOption }: ImageEditorProps) {
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [selectedPrimaryOption, setSelectedPrimaryOption] = useState<string | null>(
-    preSelectedOption || (mode.id === 'custom' ? 'custom' : (mode.id === 'coupleMashup' ? mode.primaryOptions[0]?.promptModifier : null))
+    preSelectedOption || (mode.id === 'custom' ? 'custom' : (mode.id === 'coupleMashup' ? (mode.primaryOptions[0]?.promptModifier ?? null) : null))
   );
   const [isLoading, setIsLoading] = useState(false);
   const [result, setResult] = useState<string | null>(null);
@@ -223,6 +223,7 @@ export function ImageEditor({ mode, onBack, preSelectedOption }: ImageEditorProp
           imageData,
           prompt: finalPrompt,
           mimeType,
+          model: mode.model,
         }),
       });
 

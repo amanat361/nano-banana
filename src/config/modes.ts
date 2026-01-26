@@ -43,6 +43,7 @@ export interface EditingMode {
     after: string;
   };
   maxImages?: number;  // undefined/1 = single image, 2+ = multi-image mode
+  model?: 'flash' | 'pro';  // flash = default, pro = gemini-3-pro-image for better quality
 }
 
 export const EDITING_MODES: Record<string, EditingMode> = {
@@ -491,6 +492,7 @@ export const EDITING_MODES: Record<string, EditingMode> = {
     emoji: '💕',
     basePrompt: 'Create a realistic photo of these two people as a romantic couple.',
     maxImages: 2,
+    model: 'pro',  // Use Gemini 3 Pro for better multi-image results
     primaryOptions: [
       { id: 'romantic', label: 'Romantic', emoji: '💑', promptModifier: 'Show them in a romantic pose' },
       { id: 'wedding', label: 'Wedding', emoji: '💒', promptModifier: 'Show them at their wedding' },
