@@ -7,6 +7,7 @@ import {
 export interface NanoBananaRequest {
   imageData: string;
   prompt: string;
+  mimeType?: string;
 }
 
 export interface NanoBananaResponse {
@@ -44,14 +45,14 @@ export async function processNanoBanana(request: NanoBananaRequest): Promise<Nan
       ],
     };
 
-    const model = 'gemini-2.5-flash-image-preview';
+    const model = 'gemini-2.5-flash-image';
     const contents = [
       {
         role: 'user',
         parts: [
           {
             inlineData: {
-              mimeType: 'image/jpeg',
+              mimeType: request.mimeType || 'image/jpeg',
               data: request.imageData,
             },
           },
@@ -62,31 +63,58 @@ export async function processNanoBanana(request: NanoBananaRequest): Promise<Nan
       },
     ];
 
-    const response = await ai.models.generateContentStream({
+    const response = await ai.models.generateContent({
       model,
       config,
       contents,
     });
 
-    for await (const chunk of response) {
-      // @ts-ignore
-      if (!chunk.candidates || !chunk.candidates[0].content || !chunk.candidates[0].content.parts) {
-        continue;
-      }
+    // Check if the prompt was blocked
+    // @ts-ignore - promptFeedback exists on response
+    if (response.promptFeedback?.blockReason) {
+      return {
+        success: false,
+        error: 'Your prompt was blocked due to safety filters. Try a different prompt.',
+      };
+    }
 
-      if (chunk.candidates?.[0]?.content?.parts?.[0]?.inlineData) {
-        const inlineData = chunk.candidates[0].content.parts[0].inlineData;
+    // Check if we have any candidates
+    if (!response.candidates || response.candidates.length === 0) {
+      return {
+        success: false,
+        error: 'Image was blocked due to safety filters. Try a different prompt.',
+      };
+    }
+
+    const candidate = response.candidates[0];
+
+    // Check various blocked/safety finish reasons
+    const blockedReasons = ['SAFETY', 'PROHIBITED_CONTENT', 'BLOCKLIST', 'SPII'];
+    if (candidate?.finishReason && blockedReasons.includes(candidate.finishReason)) {
+      return {
+        success: false,
+        error: 'Image was blocked due to safety filters. Try a different prompt.',
+      };
+    }
+
+    const parts = candidate?.content?.parts || [];
+    for (const part of parts) {
+      // @ts-ignore
+      if (part.inlineData?.data) {
         return {
           success: true,
-          imageData: inlineData.data || '',
-          mimeType: inlineData.mimeType || 'image/jpeg',
+          // @ts-ignore
+          imageData: part.inlineData.data,
+          // @ts-ignore
+          mimeType: part.inlineData.mimeType || 'image/png',
         };
       }
     }
 
+    // No image was generated - likely content policy related
     return {
       success: false,
-      error: 'No image generated',
+      error: 'Unable to generate this image. Try a different prompt.',
     };
   } catch (error) {
     return {

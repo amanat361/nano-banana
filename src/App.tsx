@@ -6,19 +6,22 @@ import "../styles/globals.css";
 
 export function App() {
   const [currentMode, setCurrentMode] = useState<EditingMode | null>(null);
+  const [preSelectedOption, setPreSelectedOption] = useState<string | null>(null);
 
-  const handleSelectMode = (mode: EditingMode) => {
+  const handleSelectMode = (mode: EditingMode, preSelected?: string) => {
     setCurrentMode(mode);
+    setPreSelectedOption(preSelected || null);
   };
 
   const handleBackToMenu = () => {
     setCurrentMode(null);
+    setPreSelectedOption(null);
   };
 
   return (
     <div className="max-sm:py-6">
       {currentMode ? (
-        <ImageEditor mode={currentMode} onBack={handleBackToMenu} />
+        <ImageEditor mode={currentMode} onBack={handleBackToMenu} preSelectedOption={preSelectedOption} />
       ) : (
         <MainMenu onSelectMode={handleSelectMode} />
       )}

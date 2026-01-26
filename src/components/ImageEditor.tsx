@@ -6,15 +6,17 @@ import type { EditingMode, ModeOption, ModeOptionCategory } from "../config/mode
 interface ImageEditorProps {
   mode: EditingMode;
   onBack: () => void;
+  preSelectedOption?: string | null;
 }
 
-export function ImageEditor({ mode, onBack }: ImageEditorProps) {
+export function ImageEditor({ mode, onBack, preSelectedOption }: ImageEditorProps) {
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [selectedPrimaryOption, setSelectedPrimaryOption] = useState<string | null>(
-    mode.id === 'custom' ? 'custom' : null
+    preSelectedOption || (mode.id === 'custom' ? 'custom' : null)
   );
   const [isLoading, setIsLoading] = useState(false);
   const [result, setResult] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [activeTab, setActiveTab] = useState<string | null>(null);
   const [advancedOptions, setAdvancedOptions] = useState<Record<string, string>>({});
@@ -138,10 +140,13 @@ export function ImageEditor({ mode, onBack }: ImageEditorProps) {
 
     setIsLoading(true);
     setResult(null);
+    setError(null);
 
     try {
       const imageData = selectedImage.split(',')[1];
-      
+      // Extract MIME type from data URL (e.g., "data:image/png;base64,...")
+      const mimeType = selectedImage.split(';')[0]?.split(':')[1] ?? 'image/jpeg';
+
       const response = await fetch('/api/nano-banana', {
         method: 'POST',
         headers: {
@@ -150,6 +155,7 @@ export function ImageEditor({ mode, onBack }: ImageEditorProps) {
         body: JSON.stringify({
           imageData,
           prompt: finalPrompt,
+          mimeType,
         }),
       });
 
@@ -158,10 +164,10 @@ export function ImageEditor({ mode, onBack }: ImageEditorProps) {
       if (data.success && data.imageData) {
         setResult(`data:${data.mimeType};base64,${data.imageData}`);
       } else {
-        alert(`Unable to generate image: ${data.error || 'Unknown error'}. This may be due to your prompt containing content that goes against the model's safety guidelines, or the request could not be processed. Please try modifying your prompt and try again.`);
+        setError(data.error || 'Unknown error');
       }
     } catch (error) {
-      alert(`Unable to generate image: ${error instanceof Error ? error.message : 'Unknown error'}. This may be due to your prompt containing content that goes against the model's safety guidelines, or there was a connection issue. Please try modifying your prompt and try again.`);
+      setError(error instanceof Error ? error.message : 'Connection error. Please try again.');
     } finally {
       setIsLoading(false);
       setQueueId(null);
@@ -235,7 +241,7 @@ export function ImageEditor({ mode, onBack }: ImageEditorProps) {
             <Button
               onClick={() => {
                 setShowAdvanced(!showAdvanced);
-                if (mode.categoryGroups && mode.categoryGroups.length > 0 && !showAdvanced) {
+                if (mode.categoryGroups?.[0] && !showAdvanced) {
                   setActiveTab(mode.categoryGroups[0].id);
                 }
               }}
@@ -245,6 +251,19 @@ export function ImageEditor({ mode, onBack }: ImageEditorProps) {
             >
               {showAdvanced ? "Hide Advanced Options" : "Show Advanced Options"}
             </Button>
+          )}
+
+          {error && (
+            <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm flex items-center justify-between gap-2">
+              <span>{error}</span>
+              <button
+                onClick={() => setError(null)}
+                className="text-red-500 hover:text-red-700 font-bold text-lg leading-none"
+                aria-label="Dismiss error"
+              >
+                ×
+              </button>
+            </div>
           )}
 
           {showAdvanced && (

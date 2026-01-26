@@ -4,6 +4,7 @@ import { type EditingMode } from "../config/modes";
 interface MenuItemProps {
   mode: EditingMode;
   onSelect: (mode: EditingMode) => void;
+  compact?: boolean;
 }
 
 // Function to get preview images for each mode
@@ -39,12 +40,43 @@ function getPreviewImages(modeId: string): { before: string; after: string } {
   }
 }
 
-export function MenuItem({ mode, onSelect }: MenuItemProps) {
+export function MenuItem({ mode, onSelect, compact = false }: MenuItemProps) {
   // Use mode's preview images if available, otherwise fall back to generated ones
   const { before, after } = mode.previewImages || getPreviewImages(mode.id);
 
+  if (compact) {
+    return (
+      <Card
+        className="rounded-lg border cursor-pointer hover:shadow-md transition-shadow"
+        onClick={() => onSelect(mode)}
+      >
+        <CardContent className="p-3">
+          <div className="flex items-center gap-3">
+            <img
+              src={after}
+              alt="Preview"
+              className="w-16 h-16 object-cover rounded-md border border-gray-200 flex-shrink-0"
+            />
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2">
+                <span className="text-xl">{mode.emoji}</span>
+                <h3 className="font-semibold truncate">{mode.title}</h3>
+              </div>
+              <p className="text-sm text-gray-600 truncate">{mode.description}</p>
+            </div>
+            <div className="text-gray-400 flex-shrink-0">
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
   return (
-    <Card 
+    <Card
       className="mx-2 rounded-lg border cursor-pointer hover:shadow-md transition-shadow "
       onClick={() => onSelect(mode)}
     >
@@ -54,8 +86,8 @@ export function MenuItem({ mode, onSelect }: MenuItemProps) {
           <div className="flex gap-1">
             <div className="flex-1">
               <div className="relative">
-                <img 
-                  src={before} 
+                <img
+                  src={before}
                   alt="Before preview"
                   className="w-full h-40 sm:h-50 object-cover rounded-sm border border-gray-200"
                 />
@@ -64,15 +96,15 @@ export function MenuItem({ mode, onSelect }: MenuItemProps) {
                 </div>
               </div>
             </div>
-            
+
             <div className="flex items-center justify-center px-0">
               <div className="text-gray-400 text-xl">→</div>
             </div>
-            
+
             <div className="flex-1">
               <div className="relative">
-                <img 
-                  src={after} 
+                <img
+                  src={after}
                   alt="After preview"
                   className="w-full h-40 sm:h-50 object-cover rounded-sm border border-gray-200"
                 />
