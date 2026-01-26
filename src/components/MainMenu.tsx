@@ -9,7 +9,7 @@ interface MainMenuProps {
 export function MainMenu({ onSelectMode }: MainMenuProps) {
   const allModes = getAllModes();
   const companionMode = EDITING_MODES.companion!;
-  const secondaryModes = allModes.filter((mode) => mode.id !== "companion");
+  const secondaryModes = allModes.filter((mode) => mode.id !== "companion" && mode.id !== "coupleMashup");
 
   const handleCompanionSelect = (optionId: string) => {
     const option = companionMode.primaryOptions.find(
@@ -78,6 +78,14 @@ export function MainMenu({ onSelectMode }: MainMenuProps) {
         >
           <span className="mr-2 text-xl">👩</span>
           Add Girlfriend
+        </Button>
+        <Button
+          onClick={() => onSelectMode(EDITING_MODES.coupleMashup!)}
+          className="w-full py-6 text-lg font-semibold bg-purple-600 hover:bg-purple-700"
+          size="lg"
+        >
+          <span className="mr-2 text-xl">💕</span>
+          Couple Mashup
         </Button>
       </div>
 

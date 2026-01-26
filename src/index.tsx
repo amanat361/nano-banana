@@ -36,10 +36,12 @@ const server = serve({
             const processingTimeMs = Date.now() - startTime;
             
             // Log completed generation with both images (non-blocking)
+            // For multi-image requests, we only log the first image
+            const originalImage = Array.isArray(body.imageData) ? body.imageData[0] : body.imageData;
             logImageGeneration(
               body.prompt,
               result.success,
-              body.imageData, // Original image
+              originalImage, // Original image (first one for multi-image)
               result.imageData, // Generated image (if successful)
               result.error,
               processingTimeMs

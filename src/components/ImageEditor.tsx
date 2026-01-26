@@ -12,7 +12,7 @@ interface ImageEditorProps {
 export function ImageEditor({ mode, onBack, preSelectedOption }: ImageEditorProps) {
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [selectedPrimaryOption, setSelectedPrimaryOption] = useState<string | null>(
-    preSelectedOption || (mode.id === 'custom' ? 'custom' : null)
+    preSelectedOption || (mode.id === 'custom' ? 'custom' : (mode.id === 'coupleMashup' ? mode.primaryOptions[0]?.promptModifier : null))
   );
   const [isLoading, setIsLoading] = useState(false);
   const [result, setResult] = useState<string | null>(null);
@@ -25,6 +25,15 @@ export function ImageEditor({ mode, onBack, preSelectedOption }: ImageEditorProp
   const [queueStatus, setQueueStatus] = useState<string>("");
   const [queueId, setQueueId] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const generateButtonRef = useRef<HTMLDivElement>(null);
+  const resultRef = useRef<HTMLDivElement>(null);
+
+  // Multi-image mode support
+  const isMultiImageMode = mode.maxImages && mode.maxImages > 1;
+  const [selectedImages, setSelectedImages] = useState<(string | null)[]>(
+    isMultiImageMode ? Array(mode.maxImages).fill(null) : []
+  );
+  const fileInputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -40,6 +49,31 @@ export function ImageEditor({ mode, onBack, preSelectedOption }: ImageEditorProp
   const handleImageClick = () => {
     fileInputRef.current?.click();
   };
+
+  // Multi-image handlers
+  const handleMultiImageUpload = (event: React.ChangeEvent<HTMLInputElement>, index: number) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setSelectedImages(prev => {
+          const newImages = [...prev];
+          newImages[index] = e.target?.result as string;
+          return newImages;
+        });
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleMultiImageClick = (index: number) => {
+    fileInputRefs.current[index]?.click();
+  };
+
+  // Check if all required images are uploaded (for multi-image mode)
+  const allImagesUploaded = isMultiImageMode
+    ? selectedImages.every(img => img !== null)
+    : selectedImage !== null;
 
   const handlePrimaryOptionSelect = (optionId: string) => {
     const option = mode.primaryOptions.find(opt => opt.id === optionId);
@@ -118,6 +152,25 @@ export function ImageEditor({ mode, onBack, preSelectedOption }: ImageEditorProp
     }
   }, [selectedPrimaryOption, advancedOptions, customPrompts, showAdvanced, mode.basePrompt]);
 
+  // Scroll to generate button when image is uploaded
+  useEffect(() => {
+    const hasImage = isMultiImageMode ? allImagesUploaded : selectedImage;
+    if (hasImage && generateButtonRef.current) {
+      setTimeout(() => {
+        generateButtonRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }, 100);
+    }
+  }, [selectedImage, selectedImages, allImagesUploaded, isMultiImageMode]);
+
+  // Scroll to result when generated
+  useEffect(() => {
+    if (result && resultRef.current) {
+      setTimeout(() => {
+        resultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 100);
+    }
+  }, [result]);
+
   const pollQueueStatus = async (queueId: string) => {
     const response = await fetch(`/api/queue-status?queueId=${queueId}`);
     const status = await response.json();
@@ -136,16 +189,30 @@ export function ImageEditor({ mode, onBack, preSelectedOption }: ImageEditorProp
   };
 
   const handleSubmit = async () => {
-    if (!selectedImage || !finalPrompt) return;
+    // Check requirements based on mode
+    if (isMultiImageMode) {
+      if (!allImagesUploaded || !finalPrompt) return;
+    } else {
+      if (!selectedImage || !finalPrompt) return;
+    }
 
     setIsLoading(true);
     setResult(null);
     setError(null);
 
     try {
-      const imageData = selectedImage.split(',')[1];
-      // Extract MIME type from data URL (e.g., "data:image/png;base64,...")
-      const mimeType = selectedImage.split(';')[0]?.split(':')[1] ?? 'image/jpeg';
+      let imageData: string | string[];
+      let mimeType: string | string[];
+
+      if (isMultiImageMode) {
+        // Multi-image mode: send arrays
+        imageData = selectedImages.map(img => img!.split(',')[1] ?? '');
+        mimeType = selectedImages.map(img => img!.split(';')[0]?.split(':')[1] ?? 'image/jpeg');
+      } else {
+        // Single image mode
+        imageData = selectedImage!.split(',')[1] ?? '';
+        mimeType = selectedImage!.split(';')[0]?.split(':')[1] ?? 'image/jpeg';
+      }
 
       const response = await fetch('/api/nano-banana', {
         method: 'POST',
@@ -192,34 +259,79 @@ export function ImageEditor({ mode, onBack, preSelectedOption }: ImageEditorProp
 
       <Card className="sm:rounded-lg rounded-none border-0 sm:border">
         <CardContent className="p-2 sm:p-3">
-          <div
-            onClick={handleImageClick}
-            className="w-full min-h-64 border-2 overflow-hidden border-dashed border-gray-300 sm:rounded-sm rounded-none flex items-center justify-center cursor-pointer hover:border-gray-400 transition-colors"
-          >
-            {selectedImage ? (
-              <img
-                src={selectedImage}
-                alt="Selected"
-                className="w-full"
-              />
-            ) : (
-              <div className="text-center text-gray-500">
-                <p>Click to upload image</p>
-                <p className="text-sm">or drag and drop</p>
+          {isMultiImageMode ? (
+            // Multi-image upload UI
+            <>
+              <div className="flex gap-3">
+                {Array.from({ length: mode.maxImages! }).map((_, index) => (
+                  <div key={index} className="flex-1">
+                    <div
+                      onClick={() => handleMultiImageClick(index)}
+                      className="w-full aspect-square border-2 overflow-hidden border-dashed border-gray-300 rounded-lg flex items-center justify-center cursor-pointer hover:border-gray-400 transition-colors"
+                    >
+                      {selectedImages[index] ? (
+                        <img
+                          src={selectedImages[index]!}
+                          alt={`Person ${index + 1}`}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <div className="text-center text-gray-500 p-2">
+                          <p className="text-2xl mb-1">👤</p>
+                          <p className="text-sm">Person {index + 1}</p>
+                          <p className="text-xs">(click)</p>
+                        </div>
+                      )}
+                    </div>
+                    <input
+                      ref={el => { fileInputRefs.current[index] = el; }}
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => handleMultiImageUpload(e, index)}
+                      className="hidden"
+                    />
+                  </div>
+                ))}
               </div>
-            )}
-          </div>
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept="image/*"
-            onChange={handleImageUpload}
-            className="hidden"
-          />
+              {!allImagesUploaded && (
+                <p className="text-center text-gray-500 text-sm mt-3">
+                  Please upload both photos
+                </p>
+              )}
+            </>
+          ) : (
+            // Single image upload UI
+            <>
+              <div
+                onClick={handleImageClick}
+                className="w-full min-h-64 border-2 overflow-hidden border-dashed border-gray-300 sm:rounded-sm rounded-none flex items-center justify-center cursor-pointer hover:border-gray-400 transition-colors"
+              >
+                {selectedImage ? (
+                  <img
+                    src={selectedImage}
+                    alt="Selected"
+                    className="w-full"
+                  />
+                ) : (
+                  <div className="text-center text-gray-500">
+                    <p>Click to upload image</p>
+                    <p className="text-sm">or drag and drop</p>
+                  </div>
+                )}
+              </div>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                onChange={handleImageUpload}
+                className="hidden"
+              />
+            </>
+          )}
         </CardContent>
       </Card>
 
-      {selectedImage && (
+      {(isMultiImageMode ? allImagesUploaded : selectedImage) && (
         <div className="space-y-4 px-4 sm:px-0">
           {mode.primaryOptions.length > 0 && (
             <div className="flex gap-2 flex-wrap">
@@ -394,25 +506,27 @@ export function ImageEditor({ mode, onBack, preSelectedOption }: ImageEditorProp
             </div>
           )}
 
-          <Button
-            onClick={handleSubmit}
-            disabled={!finalPrompt || isLoading}
-            className="w-full relative"
-          >
-            {isLoading ? (
-              <>
-                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                {queueStatus || "Processing..."}
-              </>
-            ) : (
-              "Generate"
-            )}
-          </Button>
+          <div ref={generateButtonRef}>
+            <Button
+              onClick={handleSubmit}
+              disabled={!finalPrompt || isLoading}
+              className="w-full relative"
+            >
+              {isLoading ? (
+                <>
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                  {queueStatus || "Processing..."}
+                </>
+              ) : (
+                "Generate"
+              )}
+            </Button>
+          </div>
         </div>
       )}
 
       {result && (
-        <Card className="sm:rounded-lg rounded-none border-0 sm:border">
+        <Card ref={resultRef} className="sm:rounded-lg rounded-none border-0 sm:border">
           <CardContent className="p-2 sm:p-3">
             <h3 className="text-lg font-semibold mb-2 px-3 sm:px-1">Result:</h3>
             <img

@@ -42,6 +42,7 @@ export interface EditingMode {
     before: string;
     after: string;
   };
+  maxImages?: number;  // undefined/1 = single image, 2+ = multi-image mode
 }
 
 export const EDITING_MODES: Record<string, EditingMode> = {
@@ -481,6 +482,34 @@ export const EDITING_MODES: Record<string, EditingMode> = {
     previewImages: {
       before: customBefore,
       after: customAfter
+    }
+  },
+  coupleMashup: {
+    id: 'coupleMashup',
+    title: 'Couple Mashup',
+    description: 'See what two people would look like as a couple',
+    emoji: '💕',
+    basePrompt: 'Create a realistic photo of these two people as a romantic couple.',
+    maxImages: 2,
+    primaryOptions: [
+      { id: 'romantic', label: 'Romantic', emoji: '💑', promptModifier: 'Show them in a romantic pose' },
+      { id: 'wedding', label: 'Wedding', emoji: '💒', promptModifier: 'Show them at their wedding' },
+      { id: 'casual', label: 'Casual', emoji: '🤝', promptModifier: 'Show them relaxed and happy together' }
+    ],
+    advancedCategories: [
+      {
+        id: 'setting',
+        label: 'Setting',
+        options: [
+          { id: 'beach', label: 'Beach', emoji: '🏖️', promptModifier: 'at the beach' },
+          { id: 'cafe', label: 'Cafe', emoji: '☕', promptModifier: 'in a cozy cafe' },
+          { id: 'park', label: 'Park', emoji: '🌳', promptModifier: 'in a beautiful park' }
+        ]
+      }
+    ],
+    previewImages: {
+      before: companionBefore,
+      after: companionAfter
     }
   }
 };

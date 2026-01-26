@@ -5,9 +5,9 @@ import {
 } from '@google/genai';
 
 export interface NanoBananaRequest {
-  imageData: string;
+  imageData: string | string[];  // Support single or array
   prompt: string;
-  mimeType?: string;
+  mimeType?: string | string[];  // Support single or array
 }
 
 export interface NanoBananaResponse {
@@ -46,16 +46,30 @@ export async function processNanoBanana(request: NanoBananaRequest): Promise<Nan
     };
 
     const model = 'gemini-2.5-flash-image';
+
+    // Build image parts - support single or multiple images
+    const imageParts: { inlineData: { mimeType: string; data: string } }[] = [];
+    if (Array.isArray(request.imageData)) {
+      request.imageData.forEach((imgData, index) => {
+        const mime = Array.isArray(request.mimeType)
+          ? request.mimeType[index] || 'image/jpeg'
+          : 'image/jpeg';
+        imageParts.push({ inlineData: { mimeType: mime, data: imgData } });
+      });
+    } else {
+      imageParts.push({
+        inlineData: {
+          mimeType: (request.mimeType as string) || 'image/jpeg',
+          data: request.imageData
+        }
+      });
+    }
+
     const contents = [
       {
         role: 'user',
         parts: [
-          {
-            inlineData: {
-              mimeType: request.mimeType || 'image/jpeg',
-              data: request.imageData,
-            },
-          },
+          ...imageParts,
           {
             text: request.prompt,
           },
